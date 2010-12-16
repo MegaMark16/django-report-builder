@@ -1,0 +1,72 @@
+{% extends "admin/change_list.html" %}
+
+{% block title %}{{ report.name }}{% endblock %}
+
+{% block content %}
+
+{% if ex %}
+<p>ERROR: </p>
+<p>{{ ex }}</p>
+<p>{{ query }}</p>
+
+
+{% else %}
+
+<form>
+{% comment %}
+{% for parameter in parameters %}
+    {% if parameter.parameter_type == 'TEXT' %}
+        {{ parameter.label }}: <input type="text" name="{{ parameter.label }}" value="{{ parameter.value }}" /><br />
+    {% endif %} 
+    {% if parameter.is_dropdown_list %}
+        {{ parameter.label }}: 
+        <select name="{{ parameter.label }}">
+            <option value="">Select</option>    
+        {% for item in parameter.get_list_items %}
+            <option value="{{ item }}" 
+            {% if item == parameter.value %}
+                selected="selected"
+            {% else %}
+                {% if item == parameter.default_value %}
+                selected="selected"
+                {% endif %}
+            {% endif %}
+            >{{ item }}</option>
+        {% endfor %}
+        </select>
+    {% endif %} 
+    {% if parameter.parameter_type == 'DATETIME' %}
+        {{ parameter.label }}: <input type="text" name="{{ parameter.label }}" value="{{ parameter.default_value }}" /> Date Picker<br />
+    {% endif %} 
+{% endfor %}
+<br />
+<br />
+<br />
+{% endcomment %}
+
+{{ report_form.as_p }}
+<input type="submit" value="Submit" />
+</form>
+
+<table>
+<tr>
+{% for header in headers %}
+    <th>{{ header }}</th>
+{% endfor %}
+</tr>
+
+{% for row in results %}
+    <tr>
+    {% for item in row %}
+    <td>{{ item }}</td>
+    {% endfor %}
+    </tr>
+{% endfor %}
+
+</table>
+{% endif %}
+<br />
+<br />
+<p class="query">{{ query }}</p>
+
+{% endblock %}
