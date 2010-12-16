@@ -6,7 +6,9 @@ from django.db import connection
 
 from models import Report
 from forms import get_report_form
+from django.contrib.admin.views.decorators import staff_member_required
 
+@staff_member_required
 def view_report(request, report_id):
     report = Report.objects.get(id=report_id)
     
