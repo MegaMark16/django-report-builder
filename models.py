@@ -4,6 +4,7 @@ from django.db import connection
 class Report(models.Model):
     name = models.CharField(max_length=255)
     query = models.TextField()
+    totals_query = models.TextField(blank=True, null=True)
 
     """    
     def save(self, *args, **kwargs):
@@ -45,7 +46,6 @@ class ReportParameter(models.Model):
             output = [('','')]
             results = cursor.fetchall()
             for item in results:
-                print item
                 if len(item) > 1:
                     output.append((item[0], item[1]))
                 elif len(item) == 1:

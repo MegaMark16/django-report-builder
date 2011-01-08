@@ -15,8 +15,11 @@ def view_report(request, report_id):
     report = Report.objects.get(id=report_id)
     
     ReportForm = get_report_form(report)
-    report_form = ReportForm(request.GET or None)
-    
+    report_form = ReportForm()
+    for item in request.GET:
+        if item not in ('order_by','order_direction',):
+            report_form = ReportForm(request.GET or None)
+            break
     cursor = connection.cursor()
     params = {}
     parameters = report.reportparameter_set.all()
@@ -27,6 +30,7 @@ def view_report(request, report_id):
         else:
             params[param.label] = param.default_value
     
+    # Run main query
     try:
         cursor.execute(str(report.query), params)
     except Exception as ex: 
@@ -46,12 +50,29 @@ def view_report(request, report_id):
         
     results = cursor.fetchall()
     
+    # If there is a Totals Query, try to run it
+    totals_results = None
+    totals_headers = None
+    totals_ex = None
+    if report.totals_query:
+        try:
+            cursor.execute(str(report.totals_query), params)
+            totals_results = cursor.fetchall()
+            totals_headers = [c[0] for c in cursor.description]
+            print totals_results
+        except Exception as totals_ex: 
+            print "OOPS! \n%s" % totals_ex
+            totals_query = str(report.totals_query % params)
+    
     response_perams = { 
         'results': results, 
         'headers': headers, 
         'parameters': parameters, 
         'query': str(report.query % params),
         'report_form': report_form,
+        'totals_results': totals_results,
+        'totals_headers': totals_headers,
+        'totals_ex': totals_ex,
     }
     
     return render_to_response('report_builder/view_report.html', response_perams, context_instance=RequestContext(request))

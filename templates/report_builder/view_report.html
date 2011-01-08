@@ -1,4 +1,5 @@
 {% extends "admin/change_list.html" %}
+{% load report_helpers %}
 
 {% block title %}{{ report.name }}{% endblock %}
 
@@ -51,7 +52,7 @@
 <table>
 <tr>
 {% for header in headers %}
-    <th>{{ header }}</th>
+    <th><a href="?{{ header|sort_link:request }}">{{ header }}</a></th>
 {% endfor %}
 </tr>
 
@@ -66,7 +67,29 @@
 </table>
 {% endif %}
 <br />
+{% if totals_ex %}
+<p>TOTALS ERROR: </p>
+<p>{{ totals_ex }}</p>
+{% else %}
+<table>
+<tr>
+{% for header in totals_headers %}
+    <th>{{ header }}</th>
+{% endfor %}
+</tr>
+
+{% for row in totals_results %}
+    <tr>
+    {% for item in row %}
+    <td>{{ item }}</td>
+    {% endfor %}
+    </tr>
+{% endfor %}
+
+</table>
+{% endif %}
 <br />
-<p class="query">{{ query }}</p>
+<br />
+<!--p class="query">{{ query }}</p-->
 
 {% endblock %}
