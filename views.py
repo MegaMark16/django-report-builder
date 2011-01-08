@@ -24,9 +24,12 @@ def view_report(request, report_id):
     params = {}
     parameters = report.reportparameter_set.all()
     for param in parameters:
-        if report_form.is_valid() and report_form.cleaned_data.get(param.label):
-            param.value = report_form.cleaned_data[param.label]
-            params[param.label] = report_form.cleaned_data[param.label]
+        if report_form.is_valid():
+            if report_form.cleaned_data.get(param.label):
+                param.value = report_form.cleaned_data[param.label]
+                params[param.label] = report_form.cleaned_data[param.label]
+            else:
+                params[param.label] = ''                
         else:
             params[param.label] = param.default_value
     
