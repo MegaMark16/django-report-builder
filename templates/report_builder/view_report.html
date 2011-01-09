@@ -70,6 +70,7 @@
 {% if totals_ex %}
 <p>TOTALS ERROR: </p>
 <p>{{ totals_ex }}</p>
+<p class="query">{{ query }}</p>
 {% else %}
 <table>
 <tr>
@@ -90,6 +91,6 @@
 {% endif %}
 <br />
 <br />
-<!--p class="query">{{ query }}</p-->
+<p class="query">{{ query }}</p>
 
 {% endblock %}
