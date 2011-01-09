@@ -64,9 +64,8 @@ def view_report(request, report_id):
             totals_headers = [c[0] for c in cursor.description]
             print totals_results
         except Exception as totals_ex: 
-            print "OOPS! \n%s" % totals_ex
-            totals_query = str(report.totals_query % params)
-    
+            pass
+                
     response_perams = { 
         'results': results, 
         'headers': headers, 
