@@ -65,6 +65,30 @@
 {% endfor %}
 
 </table>
+<p class="pagination">
+    {% if page.has_previous %}
+        {% ifequal page.previous_page_number 1 %}
+        {% else %}
+            <a href="?{{ 1|pager_link:request }}" class="pagerlink" page="1">first</a>
+            <span class="pipe"> | </span>
+        {% endifequal %}
+        <a href="?{{ page.previous_page_number|pager_link:request }}" class="pagerlink">previous</a>
+        <span class="pipe"> | </span>
+    {% endif %}
+    <span class="current">
+        Page {{ page.number }} of {{ page.paginator.num_pages }}.
+    </span>
+    {% if page.has_next %}
+        <span class="pipe"> | </span>
+        <a href="?{{ page.next_page_number|pager_link:request }}" class="pagerlink">next</a>
+        {% ifequal page.next_page_number page.paginator.num_pages %}
+        {% else %}
+            <span class="pipe"> | </span>
+            <a href="?{{ page.paginator.num_pages|pager_link:request }}" class="pagerlink">last</a>
+        {% endifequal %}
+    {% endif %}
+</p>
+
 {% endif %}
 <br />
 {% if totals_ex %}

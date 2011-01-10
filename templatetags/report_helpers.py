@@ -17,3 +17,11 @@ def sort_link(link, request):
             querystring_list.append('%s=%s' % (item, request.GET[item]))
     return '&'.join(querystring_list)
 
+@register.filter
+def pager_link(page_number, request):
+    querystring_list = ['page_number=%s' % page_number,]
+    for item in request.GET:
+        if item not in ['page_number',]:
+            querystring_list.append('%s=%s' % (item, request.GET[item]))
+    return '&'.join(querystring_list)
+

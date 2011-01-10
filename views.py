@@ -3,11 +3,30 @@ from django.shortcuts import render_to_response
 from django.template.context import RequestContext
 from django.shortcuts import get_object_or_404
 from django.db import connection
+from django.contrib.admin.views.decorators import staff_member_required
+from django.views.decorators.cache import never_cache
+from django.core.paginator import Paginator, EmptyPage
 
 from models import Report
 from forms import get_report_form
-from django.contrib.admin.views.decorators import staff_member_required
-from django.views.decorators.cache import never_cache
+
+def GetPager(request, data):
+    try:
+        page_size = int(request.GET.get('page_size', '25'))
+    except ValueError:
+        page_size = 25
+
+    paginator = Paginator(data, page_size) 
+    try:
+        page_number = int(request.GET.get('page_number', '1'))
+    except ValueError:
+        page_number = 1
+    try:
+        page = paginator.page(page_number)
+    except (EmptyPage, InvalidPage):
+        page = paginator.page(paginator.num_pages)
+    
+    return page
 
 @never_cache
 @staff_member_required
@@ -17,7 +36,7 @@ def view_report(request, report_id):
     ReportForm = get_report_form(report)
     report_form = ReportForm()
     for item in request.GET:
-        if item not in ('order_by','order_direction',):
+        if item not in ('order_by','order_direction','page_number','page_size'):
             report_form = ReportForm(request.GET or None)
             break
     cursor = connection.cursor()
@@ -52,6 +71,8 @@ def view_report(request, report_id):
             return render_to_response('report_builder/view_report.html', { 'query': str(report.query % params), 'ex': ex }, context_instance=RequestContext(request))
         
     results = cursor.fetchall()
+    page = GetPager(request, results)
+    results = page.object_list
     
     # If there is a Totals Query, try to run it
     totals_results = None
@@ -67,6 +88,7 @@ def view_report(request, report_id):
     
     response_perams = { 
         'results': results, 
+        'page': page, 
         'headers': headers, 
         'parameters': parameters, 
         'query': str(report.query % params),
