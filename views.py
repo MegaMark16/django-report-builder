@@ -25,14 +25,14 @@ def GetPager(request, data):
         page = paginator.page(page_number)
     except (EmptyPage, InvalidPage):
         page = paginator.page(paginator.num_pages)
-    
+
     return page
 
 @never_cache
 @staff_member_required
 def view_report(request, report_id):
     report = Report.objects.get(id=report_id)
-    
+
     ReportForm = get_report_form(report)
     report_form = ReportForm()
     for item in request.GET:
@@ -48,17 +48,17 @@ def view_report(request, report_id):
                 param.value = report_form.cleaned_data[param.label]
                 params[param.label] = report_form.cleaned_data[param.label]
             else:
-                params[param.label] = ''                
+                params[param.label] = ''
         else:
             params[param.label] = param.default_value
-    
+
     # Run main query
     try:
         cursor.execute(str(report.query), params)
-    except Exception as ex: 
+    except Exception as ex:
         query = str(report.query % params)
         return render_to_response('report_builder/view_report.html', { 'query': query, 'ex': ex }, context_instance=RequestContext(request))
-        
+
     headers = [c[0] for c in cursor.description]
     if request.GET.get('order_by') and request.GET['order_by'] in headers:
         if request.GET.get('order_direction') and request.GET['order_direction'] in ['ASC', 'DESC']:
@@ -69,11 +69,11 @@ def view_report(request, report_id):
             cursor.execute(str(report.query), params)
         except Exception as ex:
             return render_to_response('report_builder/view_report.html', { 'query': str(report.query % params), 'ex': ex }, context_instance=RequestContext(request))
-        
+
     results = cursor.fetchall()
     page = GetPager(request, results)
     results = page.object_list
-    
+
     # If there is a Totals Query, try to run it
     totals_results = None
     totals_headers = None
